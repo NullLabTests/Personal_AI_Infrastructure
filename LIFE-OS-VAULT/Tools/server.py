@@ -68,6 +68,7 @@ class ForgeOSHandler(http.server.SimpleHTTPRequestHandler):
         sys.stderr.write(f"[ForgeOS] {args[0]} {args[1]} {args[2]}\n")
 
 if __name__ == "__main__":
+    socketserver.TCPServer.allow_reuse_address = True
     httpd = socketserver.TCPServer(("0.0.0.0", PORT), ForgeOSHandler)
     print(f"ForgeOS server running on http://0.0.0.0:{PORT}")
     print(f"  Web UI:     http://0.0.0.0:{PORT}/ollama-webui.html")

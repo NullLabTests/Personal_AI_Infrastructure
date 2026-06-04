@@ -11,6 +11,7 @@
 [![DeepSeek R1 7B](https://img.shields.io/badge/DeepSeek_R1_7B-local-10b981?style=flat)]()
 [![PAI v5](https://img.shields.io/badge/PAI-v5-8b5cf6?style=flat&logo=github&logoColor=white)]()
 [![Obsidian](https://img.shields.io/badge/Obsidian-Dataview_ready-7c3aed?style=flat&logo=obsidian&logoColor=white)]()
+[![Tests](https://img.shields.io/badge/Tests-passing-22c55e?style=flat&logo=githubactions&logoColor=white)](Tools/test-forgeos.sh)
 [![Local-First](https://img.shields.io/badge/Local_First-✓-22c55e?style=flat)]()
 [![CPU-Friendly](https://img.shields.io/badge/CPU_Friendly-32_GB-3b82f6?style=flat)]()
 [![Systems-Thinking](https://img.shields.io/badge/Systems_Thinking-antifragile-f59e0b?style=flat)]()
@@ -187,6 +188,7 @@ Open `LIFE-OS-VAULT/Tools/ollama-webui.html` in any browser:
 | **`./setup.sh`** | One-shot bootstrap installer | `./setup.sh` |
 | **`./forgeos`** | One-command CLI — status, start, daily reports, chat | `./forgeos status`, `./forgeos start`, `./forgeos report`, `./forgeos chat` |
 | **`./Tools/ask-vault.sh`** | RAG query your vault via Ollama | `./Tools/ask-vault.sh "What are my blockers?"` |
+| **`./Tools/test-forgeos.sh`** | Run repo integrity checks | `./Tools/test-forgeos.sh` |
 | **`./LIFE-OS-VAULT/01_Cognition/Dataview-Example-Queries.md`** | Ready-to-use Dataview SQL for Obsidian | Open in Obsidian with Dataview enabled |
 | **`./LIFE-OS-VAULT/01_Cognition/Decision-Log/TEMPLATE.md`** | Structured decision documentation | Copy, rename, fill |
 | **`./LIFE-OS-VAULT/01_Cognition/Monthly-Review-Template.md`** | Monthly reflection across all 5 stacks | Copy, fill end of month |
@@ -284,10 +286,20 @@ A full Mermaid and ASCII diagram is in [`assets/five-stacks-diagram.md`](assets/
 
 ## Screenshots
 
-| PAI Pulse Dashboard | Vault Tree View |
+| PAI Pulse Dashboard (animated) | Vault Tree View |
 |:---:|:---:|
-| <img src="assets/screenshot-pulse-dashboard.png" alt="Pulse Dashboard" width="600"/> | <img src="assets/screenshot-vault-tree.png" alt="Vault Tree" width="400"/> |
-| Goals, Metrics, Projects, Budget, Recs in one page | Obsidian vault with 5-stack hierarchy |
+| <img src="assets/demo-pulse-dashboard.gif" alt="Pulse Dashboard demo" width="600"/> | <img src="assets/screenshot-vault-tree.png" alt="Vault Tree" width="400"/> |
+| Scrolling through Goals, Metrics, Projects, Budget, Recommendations | Obsidian vault with 5-stack hierarchy |
+
+## Running Tests
+
+Validate repo integrity at any time with:
+
+```bash
+./Tools/test-forgeos.sh
+```
+
+The test suite checks: repo structure, vault hierarchy, all 5 stack dashboards, template files, Dataview queries, README references, screenshot assets, git health, and optional Ollama liveness. All checks pass on a clean install.
 
 ## License
 
