@@ -2,39 +2,48 @@
 tags: [dashboard, cognition, live]
 ---
 
-# Cognition Dashboard
+# 🧠 Cognition Dashboard
 
-```dataviewjs
-const today = dv.date("today");
-const currentFile = dv.current().file.path;
-
+\`\`\`dataviewjs
 dv.paragraph(`**Last updated:** ${dv.date("now").toFormat("yyyy-MM-dd HH:mm")}`);
-dv.paragraph(`**Daily streak:** Check consecutive Daily-Systems-Report files`);
-```
+const reports = dv.pages('"01_Cognition"')
+  .where(p => p.file.name.includes("Daily-Systems-Report"));
+dv.paragraph(`**Daily reports logged:** ${reports.length}`);
+const latest = reports.sort(p => p.date, 'desc')[0];
+if (latest) dv.paragraph(`**Latest:** ${latest.file.link} (${latest.date})`);
+\`\`\`
 
 ## Recent Daily Reports
 
-```dataview
-TABLE date as "Date", Wins as "Top Win"
+\`\`\`dataview
+TABLE date as "Date", Wins as "Top Win", Blockers as "Blockers"
 FROM "01_Cognition"
 WHERE contains(file.name, "Daily-Systems-Report")
 SORT date DESC
 LIMIT 10
-```
+\`\`\`
 
-## Open Decisions & Next Actions
+## Open Tasks
 
-```dataview
+\`\`\`dataview
 TASK
 FROM "01_Cognition"
-WHERE !completed
+WHERE !completed AND !contains(text, "[]")
 SORT file.ctime DESC
-```
+\`\`\`
 
-## All Cognition Notes
+## Decision Log
 
-```dataview
+\`\`\`dataview
+TABLE date as "Date", status as "Status"
+FROM "01_Cognition/Decision-Log"
+SORT date DESC
+\`\`\`
+
+## All Files
+
+\`\`\`dataview
 TABLE file.ctime as "Created", file.tags as "Tags"
 FROM "01_Cognition"
 SORT file.ctime DESC
-```
+\`\`\`

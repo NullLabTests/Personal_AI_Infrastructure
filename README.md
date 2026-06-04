@@ -15,6 +15,7 @@
 [![CPU-Friendly](https://img.shields.io/badge/CPU_Friendly-32_GB-3b82f6?style=flat)]()
 [![Systems-Thinking](https://img.shields.io/badge/Systems_Thinking-antifragile-f59e0b?style=flat)]()
 [![License: MIT](https://img.shields.io/badge/License-MIT-60a5fa?style=flat)](LICENSE)
+[![Setup](https://img.shields.io/badge/setup.sh_one--shot-22c55e?style=flat&logo=gnubash&logoColor=white)](setup.sh)
 
 ---
 
@@ -121,64 +122,70 @@ Then open **http://localhost:31337** in your browser.
 - A computer with **8+ GB RAM** (32 GB recommended for Qwen 2.5 7B)
 - **Linux, macOS, or WSL2** on Windows
 
-### Step 1: Clone the vault
+### Option A: One-shot bootstrap (recommended)
+```bash
+git clone https://github.com/NullLabTests/ForgeOS.git
+cd ForgeOS
+./setup.sh        # Installs Ollama + Bun + Pulse + pulls models + starts everything
+```
+
+### Option B: Manual step-by-step
+
+#### Step 1: Clone
 ```bash
 git clone https://github.com/NullLabTests/ForgeOS.git
 cd ForgeOS
 ```
 
-### Step 2: Install Ollama
+#### Step 2: Install Ollama
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-### Step 3: Pull the local LLM
+#### Step 3: Pull local LLMs
 ```bash
-ollama pull qwen2.5:7b     # 4.7 GB — recommended
-# or
-ollama pull deepseek-r1:7b # 4.7 GB — also works
+ollama pull deepseek-r1:1.5b   # 1.1 GB — fast, daily queries
+ollama pull deepseek-r1:7b     # 4.7 GB — full reasoning (optional)
+ollama pull nomic-embed-text   # 274 MB — RAG embeddings
 ```
 
-### Step 4: Open the vault in Obsidian
+#### Step 4: Open vault in Obsidian
 1. Open Obsidian → **Open folder as vault** → select `LIFE-OS-VAULT/`
-2. Install the **Dataview** plugin (Community plugins → browse → Dataview → enable)
-3. (Recommended) Install **Periodic Notes**, **Tasks**, **Calendar** plugins
+2. Install **Dataview** plugin (Community plugins → browse → Dataview → enable)
+3. (Recommended) **Periodic Notes**, **Tasks**, **Calendar** plugins
 
-### Step 5: Generate your first Daily Systems Report
+#### Step 5: First daily report
 ```bash
-./forgeos report                          # today's report
-# or manually:
-cp 01_Cognition/Daily-Systems-Report-2026-06-04.md \
-   01_Cognition/Daily-Systems-Report-$(date +%Y-%m-%d).md
+./forgeos report          # auto-generates today's report
 ```
 
-### Step 6: Verify the AI works
+#### Step 6: Start everything
 ```bash
-ollama run deepseek-r1:7b "Summarize: ForgeOS is a personal operating system."
+./forgeos start           # Ollama API (:11434) + Pulse Dashboard (:31337)
 ```
 
-### Step 7: Start everything with one command
+#### Step 7: Verify
 ```bash
-./forgeos start
-# Opens: Ollama API (:11434) + Pulse Dashboard (:31337)
+ollama run deepseek-r1:7b "What makes ForgeOS different?"
 ```
 
-### Step 8: Query your vault with AI
+#### Step 8: Ask your vault
 ```bash
-./Tools/ask-vault.sh "What were my most recent wins?"
+./Tools/ask-vault.sh "What wins did I log this week?"
 ```
 
-### Step 9 (optional): Connect PAI agents
-[PAI](https://github.com/danielmiessler/Personal_AI_Infrastructure) is included. Configure for local Ollama:
+#### Step 9: Chat with the local LLM
+Open `LIFE-OS-VAULT/Tools/ollama-webui.html` in any browser:
 ```bash
-export OLLAMA_HOST=http://localhost:11434
+./forgeos chat
 ```
 
 ## 🛠️ Tools & Scripts
 
 | Tool | Purpose | Usage |
 |------|---------|-------|
-| **`./forgeos`** | One-command CLI — status, start, daily reports | `./forgeos status`, `./forgeos start`, `./forgeos report` |
+| **`./setup.sh`** | One-shot bootstrap installer | `./setup.sh` |
+| **`./forgeos`** | One-command CLI — status, start, daily reports, chat | `./forgeos status`, `./forgeos start`, `./forgeos report`, `./forgeos chat` |
 | **`./Tools/ask-vault.sh`** | RAG query your vault via Ollama | `./Tools/ask-vault.sh "What are my blockers?"` |
 | **`./LIFE-OS-VAULT/01_Cognition/Dataview-Example-Queries.md`** | Ready-to-use Dataview SQL for Obsidian | Open in Obsidian with Dataview enabled |
 | **`./LIFE-OS-VAULT/01_Cognition/Decision-Log/TEMPLATE.md`** | Structured decision documentation | Copy, rename, fill |
@@ -213,7 +220,8 @@ LIMIT 10
 
 ```
 ForgeOS/
-├── forgeos                 # ⚡ One-command CLI (status / start / report)
+├── forgeos                 # ⚡ One-command CLI (status / start / report / chat)
+├── setup.sh                # 🚀 One-shot bootstrap installer
 ├── LIFE-OS-VAULT/          # ⭐ The vault — star of the repo
 │   ├── 01_Cognition/       #   Mental models, decisions, daily reports
 │   │   ├── Decision-Log/   #   Decision templates & records

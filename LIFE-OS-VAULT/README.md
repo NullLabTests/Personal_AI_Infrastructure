@@ -10,62 +10,92 @@ ForgeOS is a living, queryable, version-controlled second brain — a Single Sou
 
 ```
  01_Cognition ————————————→ 02_Body
-      ↑                            ↓
-      |                         03_Capital
-      ↑                            ↓
-      |                         04_Relationships
-      ↑                            ↓
-      +———— 05_Impact ←———————+
+     ↑                            ↓
+     |                         03_Capital
+     ↑                            ↓
+     |                         04_Relationships
+     ↑                            ↓
+     +———— 05_Impact ←———————+
 ```
 
-- **01_Cognition**: Mental models, decision logs, Daily Systems Reports, chat histories with PAI/local LLM. *The executive center.*
-- **02_Body**: Health metrics, sleep data, bloodwork, Oura/Whoop exports. *The sensory layer.*
-- **03_Capital**: Finances, investments, budget tracking, net worth. *The resource layer.*
-- **04_Relationships**: People notes, commitments, meeting logs. *The social layer.*
-- **05_Impact**: Projects, creative output, open-source plans, content. *The actuation layer.* Each feeds the next and loops back into cognition.
+| Stack | Layer | Purpose |
+|-------|-------|---------|
+| [🧠 **01_Cognition**](01_Cognition/) | Executive | Mental models, decisions, daily reports, chat histories |
+| [💪 **02_Body**](02_Body/) | Sensory | Health metrics, sleep, bloodwork, Oura/Whoop exports |
+| [💰 **03_Capital**](03_Capital/) | Resource | Finances, investments, budget tracking, net worth |
+| [🤝 **04_Relationships**](04_Relationships/) | Social | People notes, commitments, meeting logs |
+| [🌍 **05_Impact**](05_Impact/) | Actuation | Projects, creative output, open-source, content |
+
+## Live Dashboards
+
+Each stack has a `Dashboard.md` with DataviewJS queries — open them in Obsidian with the **Dataview plugin** enabled:
+
+| Stack | Dashboard | Key Query |
+|-------|-----------|-----------|
+| 🧠 Cognition | [`01_Cognition/Dashboard.md`](01_Cognition/Dashboard.md) | Recent reports, open tasks |
+| 💪 Body | [`02_Body/Dashboard.md`](02_Body/Dashboard.md) | Health metrics summary |
+| 💰 Capital | [`03_Capital/Dashboard.md`](03_Capital/Dashboard.md) | Budget variance, net worth |
+| 🤝 Relationships | [`04_Relationships/Dashboard.md`](04_Relationships/Dashboard.md) | People directory, due commitments |
+| 🌍 Impact | [`05_Impact/Dashboard.md`](05_Impact/Dashboard.md) | Active projects, ideas pipeline |
+
+Example query — recent reports across the vault:
+```
+\`\`\`dataview
+TABLE date as "Date", Wins as "Top Win"
+FROM "01_Cognition"
+WHERE contains(file.name, "Daily-Systems-Report")
+SORT date DESC
+LIMIT 10
+\`\`\`
+```
+
+## Templates
+
+| Template | Location | Use |
+|----------|----------|-----|
+| Daily Report | `01_Cognition/Daily-Systems-Report-YYYY-MM-DD.md` | `./forgeos report` or copy date-stamped file |
+| Decision Log | `01_Cognition/Decision-Log/TEMPLATE.md` | Document every significant decision with context, options, outcome |
+| Monthly Review | `01_Cognition/Monthly-Review-Template.md` | Cross-stack monthly reflection |
+| People Note | `04_Relationships/People/TEMPLATE.md` | Per-person context, commitments, history |
+| Budget CSV | `03_Capital/Budget/budget-template.csv` | Income vs expense tracking |
 
 ## PAI Pulse Dashboard
 
-ForgeOS ships with **PAI Pulse** — a real-time life dashboard at **`http://localhost:31337`**. It renders your goals, metrics, projects, budget, team, and recommendations.
+ForgeOS ships with **PAI Pulse** — a real-time life dashboard at **`http://localhost:31337`** covering goals, metrics, projects, budget, team, and recommendations across all 5 stacks.
 
-```bash
-# Start the dashboard
-cd ~/.claude/PAI/PULSE && bun run pulse.ts
-# Then open http://localhost:31337
-```
+## Integration with Local LLM
 
-The dashboard covers all five stacks: Cognition (goals/recs), Body (health metrics), Capital (budget), Relationships (team/people), Impact (projects).
+This vault pairs with Ollama + DeepSeek R1 7B (or Qwen 2.5 7B). The LLM can:
 
-## Integration with PAI + Local LLM
-
-This vault pairs with the **PAI (Personal AI Infrastructure)** codebase running in this Codespace. The local **Qwen 2.5 7B** or **DeepSeek R1 7B** model (via Ollama) can:
 - Ingest Daily Systems Reports and suggest next actions
-- Cross-reference health data (02_Body) with cognitive performance (01_Cognition)
-- Query vault contents via vector embeddings (future: RAG with `nomic-embed-text`)
+- Cross-reference health data with cognitive performance
+- Query vault contents via RAG (`./Tools/ask-vault.sh`)
 - Generate financial summaries from 03_Capital CSVs
 - Draft project plans in 05_Impact
 
-LLM endpoint: `http://localhost:11434` (Ollama, local only — no API keys, no external calls)
+LLM endpoint: `http://localhost:11434` — local only, no API keys.
 
 ## Recommended Obsidian Plugins
 
-> These turn a folder of markdown files into a **living dashboard**.
-
 | Plugin | Why |
 |--------|-----|
-| **Dataview** | **Essential.** Query any note across the vault as a live database. Filter by tags, dates, fields, links. Powers the dashboards below. |
-| Periodic Notes | Auto-create Daily/Weekly/Monthly notes from templates. Keeps 01_Cognition flowing. |
-| Tasks | Rich task management with dates, priorities, project groupings. Syncs with Dataview queries. |
-| Calendar | Visual calendar view — click any date to open or create its daily note. |
-| Kanban | Turn lists into boards for project tracking in 05_Impact. |
+| **Dataview** | Essential — query any note as a live database. Powers all dashboards. |
+| Periodic Notes | Auto-create Daily/Weekly/Monthly notes from templates |
+| Tasks | Rich task management with dates, priorities, project groupings |
+| Calendar | Visual calendar — click any date to open daily note |
+| Kanban | Turn lists into boards for project tracking |
 
-With Dataview alone, this vault becomes queryable like a database:
-```dataview
-TABLE file.ctime, file.tags
-FROM "01_Cognition"
-SORT file.ctime DESC
+## Repository
+
+```bash
+# Quick start
+git clone https://github.com/NullLabTests/ForgeOS.git
+cd ForgeOS
+./setup.sh               # Install everything
+./forgeos start           # Start Ollama + Dashboard
+./forgeos report          # First daily report
 ```
 
 ---
 
-*Initialized: 2026-06-04 | Repository: github.com/NullLabTests/ForgeOS*
+*Initialized: 2026-06-04 · Repository: [github.com/NullLabTests/ForgeOS](https://github.com/NullLabTests/ForgeOS)*

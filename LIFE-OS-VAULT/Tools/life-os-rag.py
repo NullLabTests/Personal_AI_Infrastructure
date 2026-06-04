@@ -17,6 +17,7 @@ OLLAMA_URL = "http://localhost:11434"
 EMBED_MODEL = "nomic-embed-text"
 CHAT_MODEL = "deepseek-r1:1.5b"
 MAX_CHUNKS = 5
+CHUNK_DISPLAY = 1200
 
 def embed(text: str) -> list[float]:
     import urllib.request
@@ -43,7 +44,7 @@ def save_index(index: dict):
 def get_md_files():
     return sorted(VAULT_DIR.rglob("*.md"))
 
-def chunk_text(text: str, max_chars=800) -> list[str]:
+def chunk_text(text: str, max_chars=1200) -> list[str]:
     chunks = []
     paragraphs = text.split("\n\n")
     current = ""
@@ -113,6 +114,8 @@ def cmd_query(query: str):
         print("No semantically close results found.")
 
 def cmd_ask(query: str):
+    """RAG-powered Q&A. Note: for CPU-only 1.5B models, semantic search is reliable but
+    LLM-grounded answers may hallucinate. The context is shown for your verification."""
     index = load_index()
     if not index.get("chunks"):
         print("No index found. Run 'index' first.")
@@ -127,14 +130,20 @@ def cmd_ask(query: str):
             break
         if chunk["file"] not in seen:
             seen.add(chunk["file"])
-            context_parts.append(f"=== {chunk['file']} ===\n{chunk['text'][:600]}")
+            context_parts.append(f"=== {chunk['file']} ===\n{chunk['text'][:CHUNK_DISPLAY]}")
     context = "\n\n".join(context_parts)
 
+    # Show context to user first (transparency)
+    print("\n--- Relevant Context ---")
+    for s in seen:
+        print(f"  - {s}")
+    print()
+
     import urllib.request
-    system = "You are DeepSeek R1 for TheGoldenAnchor Life OS. Be concise."
+    system = "You are DeepSeek R1. Answer using ONLY the context below. If unsure, say 'Not in context.'"
     messages = [
         {"role": "system", "content": system},
-        {"role": "user", "content": f"Here is context from my Life OS vault:\n\n{context}\n\n---\n\nBased ONLY on the context above, answer: {query}\n\nIf the context doesn't contain the answer, reply 'Not in vault.'"},
+        {"role": "user", "content": f"Context:\n{context}\n\n---\n\nQuestion: {query}\n\n(Answer from context only or say 'Not in context.')"},
     ]
     payload = json.dumps({"model": CHAT_MODEL, "messages": messages, "stream": False}).encode()
     req = urllib.request.Request(f"{OLLAMA_URL}/api/chat", data=payload,
@@ -143,10 +152,8 @@ def cmd_ask(query: str):
     data = json.loads(resp.read())
     reply = data.get("message", {}).get("content", "")
     clean = re.sub(r'<think>.*?</think>', '', reply, flags=re.DOTALL).strip()
-    print("\n--- Sources ---")
-    for s in seen:
-        print(f"  - {s}")
-    print(f"\n--- Response ---\n{clean}")
+    print(f"--- DeepSeek Answer ---\n{clean}\n")
+    print("--- Note: 1.5B models may hallucinate. Verify answers against the context shown above. ---")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -159,5 +166,7 @@ if __name__ == "__main__":
         cmd_query(sys.argv[2])
     elif cmd == "ask" and len(sys.argv) > 2:
         cmd_ask(sys.argv[2])
+    elif cmd == "extract" and len(sys.argv) > 2:
+        cmd_query(sys.argv[2])
     else:
         print(__doc__)

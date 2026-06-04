@@ -2,48 +2,48 @@
 tags: [dashboard, relationships, people, live]
 ---
 
-# Relationships Dashboard
+# 🤝 Relationships Dashboard
 
-```dataviewjs
+\`\`\`dataviewjs
 dv.paragraph(`**Last updated:** ${dv.date("now").toFormat("yyyy-MM-dd HH:mm")}`);
-const people = dv.pages('"04_Relationships/People"');
+const people = dv.pages('"04_Relationships/People"')
+  .where(p => p.file.name != "TEMPLATE");
 dv.paragraph(`**People tracked:** ${people.length}`);
-const meetings = dv.pages('"04_Relationships/Meetings"').sort(p => p.date, 'desc');
-dv.paragraph(`**Recent meetings:** ${meetings.length} total`);
-```
+const active = people.where(p => p.status == "active");
+dv.paragraph(`**Active connections:** ${active.length}`);
+\`\`\`
 
 ## People Directory
 
-```dataview
-TABLE file.ctime as "Since", file.tags as "Tags", last_contact as "Last Contact"
+\`\`\`dataview
+TABLE status as "Status", last-contact as "Last Contact"
 FROM "04_Relationships/People"
-SORT last_contact ASC
-LIMIT 50
-```
+WHERE file.name != "TEMPLATE"
+SORT last-contact DESC
+\`\`\`
 
-## Meeting History
+## Meeting Logs
 
-```dataview
-TABLE date as "Date", person as "Person", type as "Type", summary as "Summary"
+\`\`\`dataview
+TABLE file.ctime as "Date"
 FROM "04_Relationships/Meetings"
-SORT date DESC
-LIMIT 20
-```
+SORT file.ctime DESC
+LIMIT 10
+\`\`\`
 
 ## Open Commitments
 
-```dataview
+\`\`\`dataview
 TASK
-FROM "04_Relationships/Commitments"
+FROM "04_Relationships"
 WHERE !completed
-SORT due ASC
-```
+SORT file.ctime DESC
+\`\`\`
 
-## Relationship Reflections
+## All Relationship Notes
 
-```dataview
-TABLE date as "Date", person as "Person", rating as "Health"
-FROM "04_Relationships/Annual-Review"
-SORT date DESC
-LIMIT 10
-```
+\`\`\`dataview
+TABLE file.ctime as "Created"
+FROM "04_Relationships"
+SORT file.ctime DESC
+\`\`\`

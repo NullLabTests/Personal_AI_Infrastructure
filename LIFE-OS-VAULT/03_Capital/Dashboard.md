@@ -1,50 +1,31 @@
 ---
-tags: [dashboard, capital, finance, net-worth, live]
+tags: [dashboard, capital, finance, live]
 ---
 
-# Capital Dashboard
+# 💰 Capital Dashboard
 
-```dataviewjs
+\`\`\`dataviewjs
 dv.paragraph(`**Last updated:** ${dv.date("now").toFormat("yyyy-MM-dd HH:mm")}`);
-const snapshots = dv.pages('"03_Capital/Net-Worth"').sort(p => p.date, 'desc');
-if (snapshots.length > 0) {
-  dv.paragraph(`**Latest net worth snapshot:** ${snapshots[0].file.link}`);
-  dv.paragraph(`**Net worth trend:** ${snapshots.length} snapshots tracked`);
-}
-```
+const notes = dv.pages('"03_Capital"')
+  .where(p => p.file.name != "README" && p.file.name != "Dashboard");
+dv.paragraph(`**Financial snapshots:** ${notes.length}`);
+dv.paragraph(`**Tracked in vault:** Budget, Net Worth, Investments, Expenses`);
+\`\`\`
 
-## Net Worth Timeline
+## Recent Financial Records
 
-```dataview
-TABLE date as "Date", total as "Total", assets as "Assets", liabilities as "Liabilities"
-FROM "03_Capital/Net-Worth"
-SORT date DESC
-LIMIT 12
-```
+\`\`\`dataview
+TABLE file.ctime as "Date", file.tags as "Tags"
+FROM "03_Capital"
+WHERE file.name != "README" AND file.name != "Dashboard"
+SORT file.ctime DESC
+LIMIT 10
+\`\`\`
 
-## Budget Variance
+## All Capital Notes
 
-```dataview
-TABLE date as "Month", planned as "Planned", actual as "Actual", variance as "Variance"
-FROM "03_Capital/Budget"
-SORT date DESC
-LIMIT 12
-```
-
-## Investment Allocation
-
-```dataview
-TABLE date as "Date", asset_class as "Class", allocation as "Allocation %"
-FROM "03_Capital/Investments"
-SORT date DESC
-LIMIT 20
-```
-
-## Recent Expenses
-
-```dataview
-TABLE date as "Date", category as "Category", amount as "Amount", note as "Note"
-FROM "03_Capital/Expenses"
-SORT date DESC
-LIMIT 30
-```
+\`\`\`dataview
+TABLE file.ctime as "Created"
+FROM "03_Capital"
+SORT file.ctime DESC
+\`\`\`
