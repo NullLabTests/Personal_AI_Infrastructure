@@ -1,0 +1,11 @@
+*.env
+*.key
+secrets/
+*.csv
+node_modules/
+.obsidian/workspace*
+__pycache__/
+*.pyc
+.DS_Store
+*.log
+.tmp/
