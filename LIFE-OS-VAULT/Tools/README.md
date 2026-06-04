@@ -37,7 +37,7 @@ bash life-os-ask.sh "what is in my body stack?"
 ### `ollama-webui.html` — Browser Chat
 Open in browser or serve via:
 ```bash
-python3 -m http.server 8080 --directory /workspaces/Personal_AI_Infrastructure/LIFE-OS-VAULT/Tools
+python3 -m http.server 8080 --directory "$(dirname "$(dirname "$(readlink -f "$0")")")/Tools"
 # → http://localhost:8080/ollama-webui.html
 ```
 

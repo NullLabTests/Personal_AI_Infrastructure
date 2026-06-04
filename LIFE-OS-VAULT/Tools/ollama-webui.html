@@ -41,8 +41,8 @@
   <button id="send">Send</button>
 </div>
 <script>
-const OLLAMA_HOST = 'http://localhost:11434';
-let messages = [{ role: 'system', content: 'You are DeepSeek R1, a helpful AI assistant integrated with TheGoldenAnchor Life OS. You have access to a five-stack vault: Cognition, Body, Capital, Relationships, Impact. Be concise, thoughtful, and reference the Life OS context when relevant.' }];
+const OLLAMA_HOST = '';  // relative — uses same origin (proxied by server.py)
+let messages = [{ role: 'system', content: 'You are DeepSeek R1, a helpful AI assistant integrated with ForgeOS. You have access to a five-stack vault: Cognition, Body, Capital, Relationships, Impact. Be concise, thoughtful, and reference the Life OS context when relevant.' }];
 
 const chat = document.getElementById('chat');
 const input = document.getElementById('input');
@@ -53,7 +53,7 @@ const modelSelect = document.getElementById('model-select');
 
 async function loadModels() {
   try {
-    const res = await fetch(`${OLLAMA_HOST}/api/tags`);
+    const res = await fetch(`/api/tags`);
     const data = await res.json();
     modelSelect.innerHTML = data.models.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
     localStorage.getItem('ollama_model') && (modelSelect.value = localStorage.getItem('ollama_model'));
@@ -85,7 +85,7 @@ async function sendMessage() {
   chat.appendChild(thinkingDiv);
 
   try {
-    const res = await fetch(`${OLLAMA_HOST}/api/chat`, {
+    const res = await fetch(`/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: modelSelect.value, messages, stream: false })

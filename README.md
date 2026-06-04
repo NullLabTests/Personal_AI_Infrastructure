@@ -286,9 +286,8 @@ A full Mermaid and ASCII diagram is in [`assets/five-stacks-diagram.md`](assets/
 
 | PAI Pulse Dashboard | Vault Tree View |
 |:---:|:---:|
-| ![Pulse Dashboard](https://via.placeholder.com/600x350/0f172a/9ACBFF?text=PAI+Pulse+Dashboard+localhost:31337) | ![Vault Tree](https://via.placeholder.com/600x350/1e293b/ffffff?text=ForgeOS+Vault+Tree) |
+| <img src="assets/screenshot-pulse-dashboard.png" alt="Pulse Dashboard" width="600"/> | <img src="assets/screenshot-vault-tree.png" alt="Vault Tree" width="400"/> |
 | Goals, Metrics, Projects, Budget, Recs in one page | Obsidian vault with 5-stack hierarchy |
-| *(Replace `assets/screenshot-pulse-dashboard.png`)* | *(Replace `assets/screenshot-vault-tree.png`)* |
 
 ## License
 

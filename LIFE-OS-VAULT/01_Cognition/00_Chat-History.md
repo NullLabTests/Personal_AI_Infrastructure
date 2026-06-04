@@ -10,7 +10,7 @@ tags: [context, meta, life-os-init]
 ## VaultBuilder Session
 
 - **Agent**: VaultBuilder (Precise, local-first systems engineer)
-- **Task**: Create TheGoldenAnchor's Life OS Single Source of Truth
+- **Task**: Create ForgeOS Life OS Single Source of Truth
 - **Setup**: CPU-only GitHub Codespace, 7.8 GB RAM
 - **LLM**: DeepSeek (via local Ollama at http://localhost:11434)
 - **RAG Model**: nomic-embed-text (future vector search)

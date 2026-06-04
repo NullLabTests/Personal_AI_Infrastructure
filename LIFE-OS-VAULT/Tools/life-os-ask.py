@@ -20,7 +20,7 @@ def call_ollama(messages, model="deepseek-r1:1.5b", timeout=300):
 
 def chat_mode():
     print(f"Life OS Chat (DeepSeek) — Ctrl+D to exit\n{'='*45}")
-    msgs = [{"role": "system", "content": "You are DeepSeek R1 for TheGoldenAnchor Life OS (5 stacks: Cognition, Body, Capital, Relationships, Impact). Answer concisely."}]
+    msgs = [{"role": "system", "content": "You are DeepSeek R1 for ForgeOS (5 stacks: Cognition, Body, Capital, Relationships, Impact). Answer concisely."}]
     while True:
         try:
             q = input("> ")
@@ -42,7 +42,7 @@ def ask(query, model="deepseek-r1:1.5b"):
     )
     context = result.stdout.strip() if result.returncode == 0 else ""
 
-    system = "You are DeepSeek R1 for TheGoldenAnchor Life OS. Answer ONLY using the vault context below. If the context doesn't contain the answer, say 'Not found in vault.' Be concise."
+    system = "You are DeepSeek R1 for ForgeOS. Answer ONLY using the vault context below. If the context doesn't contain the answer, say 'Not found in vault.' Be concise."
     prompt = f"Question: {query}\n\nVault context:\n{context}\n\n(Answer based only on context above)"
 
     print("Asking DeepSeek...")
