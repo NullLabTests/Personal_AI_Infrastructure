@@ -18,7 +18,7 @@
 
 ---
 
-**Explore:** [Why This Exists](#why-this-exists) · [Core Philosophy](#core-philosophy) · [The Five Stacks](#the-five-stacks) · [Quick Install](#quick-install--10-minutes) · [The Vault →](LIFE-OS-VAULT/README.md)
+**Explore:** [Why This Exists](#why-this-exists) · [Core Philosophy](#core-philosophy) · [The Five Stacks](#the-five-stacks) · [Quick Install](#quick-install--10-minutes) · [PAI Pulse Dashboard](#-pai-pulse-dashboard) · [The Vault →](LIFE-OS-VAULT/README.md)
 
 ---
 
@@ -34,16 +34,19 @@ Most personal knowledge management systems are **dead folders** — they collect
 - **Thinks in systems** — five interconnected life stacks with feedback loops, not silos
 - **Acts on your behalf** — local AI agents (Qwen 2.5 7B / DeepSeek R1 7B via Ollama) ingest your daily reports and suggest next actions
 - **Grows with you** — version-controlled via git, queryable via Obsidian Dataview, extensible via the PAI agent framework
+- **Visualizes your life** — the PAI Pulse dashboard (localhost:31337) gives you a real-time Goals → Metrics → Projects → Recommendations view
 
 Inspired by [danielmiessler's PAI](https://github.com/danielmiessler/Personal_AI_Infrastructure) and the original *kache* thread, ForgeOS distills the Life Operating System concept into a **one-person, one-machine, one-vault** implementation that anyone can set up in under 10 minutes.
 
 ## Core Philosophy
 
-- **Privacy-first, local-only.** Every model runs on your machine via Ollama. Zero cloud dependencies. Your thoughts, health data, finances, relationships, and projects never leave your CPU.
-- **One agent at a time.** Focus over parallelism. The AI works with you, not for a crowd.
-- **Antifragile.** The system gets stronger with use. Every daily report, every decision log, every query makes the vault smarter.
-- **Systems thinking.** The five stacks are not folders — they are interconnected layers with feedback loops. Cognition directs body. Body resources capital. Capital enables relationships. Relationships drive impact. Impact feeds back into cognition.
-- **Queryable by default.** With Obsidian Dataview, every note is a database row. Ask "what did I weigh when my sleep was best?" or "which projects generated the most impact per hour?" — and get answers instantly.
+| Principle | Meaning |
+|-----------|---------|
+| **🔒 Privacy-first, local-only** | Every model runs on your machine via Ollama. Zero cloud dependencies. Your thoughts, health data, finances, relationships, and projects never leave your CPU. |
+| **🎯 One agent at a time** | Focus over parallelism. The AI works *with you*, not for a crowd. |
+| **🌱 Antifragile** | The system gets stronger with use. Every daily report, decision log, and query makes the vault smarter. |
+| **🔄 Systems thinking** | Five interconnected stacks with feedback loops — not silos. Cognition directs body. Body resources capital. Capital enables relationships. Relationships drive impact. Impact feeds back into cognition. |
+| **🔍 Queryable by default** | With Obsidian Dataview, every note is a database row. Ask *"what did I weigh when my sleep was best?"* or *"which projects generated the most impact per hour?"* |
 
 ## The Five Stacks
 
@@ -68,15 +71,49 @@ graph TD
     style C5 fill:#8b5cf6,stroke:#fff,color:#fff
 ```
 
-| Stack | Purpose | What Goes Here |
-|-------|---------|----------------|
-| **01_Cognition** 🧠 | Executive center. Mental models, decisions, daily logs. | Daily Systems Reports, decision logs, chat histories, mental models, Dataview queries |
-| **02_Body** 💪 | Sensory layer. Health metrics, sleep, exercise, bloodwork. | Sleep exports (Oura/Whoop), HRV, workouts, biomarker trends |
-| **03_Capital** 💰 | Resource layer. Finances, income, expenses, net worth. | Budget CSVs, net worth snapshots, investment allocations |
-| **04_Relationships** 🤝 | Social layer. People, commitments, meetings. | Per-person notes, 1:1 logs, promises made, annual reviews |
-| **05_Impact** 🌍 | Actuation layer. Projects, output, legacy. | Active/archived projects, open-source, content, ideas |
+| Stack | Layer | What Goes Here |
+|:-----:|-------|----------------|
+| 🧠 **01_Cognition** | Executive | Daily Systems Reports, decision logs, chat histories, mental models, Dataview queries |
+| 💪 **02_Body** | Sensory | Sleep exports (Oura/Whoop), HRV, workouts, biomarker trends |
+| 💰 **03_Capital** | Resource | Budget CSVs, net worth snapshots, investment allocations |
+| 🤝 **04_Relationships** | Social | Per-person notes, 1:1 logs, promises made, annual reviews |
+| 🌍 **05_Impact** | Actuation | Active/archived projects, open-source, content, ideas |
 
 Each stack feeds the next in a **closed-loop system** — Impact generates lessons that flow back into Cognition.
+
+---
+
+## 🖥️ PAI Pulse Dashboard
+
+ForgeOS includes **PAI Pulse** — a real-time life dashboard served at **`http://localhost:31337`** that visualizes your goals, metrics, projects, budget, team, and recommendations in a single page.
+
+### What it shows
+
+| Section | What you see |
+|---------|-------------|
+| **🎯 Goals** | KPIs with progress bars per life dimension (creative, money, health, relationships, freedom) |
+| **📊 Metrics** | First-class measurements with sparklines — sleep, distance, MRR, focus time, and more |
+| **🧩 Challenges & Strategies** | Personal blockers mapped to the strategies that answer them |
+| **📋 Projects & Work** | What's moving right now — each work item traces to its strategy and goal |
+| **👥 Team** | Humans and agents doing the work, with ownership mapped |
+| **💰 Budget** | Money, time, and attention budgets with progress bars |
+| **💡 Recommendations** | Next 2-3 moves with traceability back to primitives |
+
+### Start the dashboard
+
+```bash
+# 1. Install Bun (if not installed)
+curl -fsSL https://bun.sh/install | bash
+
+# 2. Start Pulse
+cd ~/.claude/PAI/PULSE && bun run pulse.ts
+```
+
+Then open **http://localhost:31337** in your browser.
+
+> **Current status:** Pulse dashboard is running in this Codespace at `localhost:31337` with Observability, Voice, Wiki, Performance, Syslog, and Telegram modules loaded.
+
+---
 
 ## Quick Install (<10 minutes)
 
@@ -109,30 +146,43 @@ ollama pull deepseek-r1:7b # 4.7 GB — also works
 
 ### Step 5: Generate your first Daily Systems Report
 ```bash
-# From the vault root, copy the template:
 cp 01_Cognition/Daily-Systems-Report-2026-06-04.md \
    01_Cognition/Daily-Systems-Report-$(date +%Y-%m-%d).md
 ```
-Open in Obsidian, customize, and watch Dataview queries light up.
 
 ### Step 6: Verify the AI works
 ```bash
 ollama run qwen2.5:7b "Summarize: ForgeOS is a personal operating system."
 ```
 
-### Step 7 (optional): Connect PAI agents
-[PAI (Personal AI Infrastructure)](https://github.com/danielmiessler/Personal_AI_Infrastructure) is included in this repo. Configure it to use your local Ollama endpoint:
-
+### Step 7: Start the Pulse dashboard
 ```bash
-# PAI auto-detects local Ollama. If needed, set:
+# Requires Bun
+curl -fsSL https://bun.sh/install | bash
+source ~/.bashrc
+
+# Copy Pulse from release files
+mkdir -p ~/.claude/PAI/PULSE
+cp -r Releases/v5.0.0/.claude/PAI/PULSE/* ~/.claude/PAI/PULSE/
+
+# Install dependencies & start
+cd ~/.claude/PAI/PULSE/Observability && bun install && cd ..
+bun run pulse.ts
+# Open http://localhost:31337
+```
+
+### Step 8 (optional): Connect PAI agents
+[PAI](https://github.com/danielmiessler/Personal_AI_Infrastructure) is included. Configure for local Ollama:
+```bash
 export OLLAMA_HOST=http://localhost:11434
 ```
 
 ## Current Status
 
 ```
-⚡ Running Qwen 2.5 7B locally on CPU
-🧠 WebUI ready via PAI interface (localhost:31337)
+⚡ Running Qwen 2.5 7B / DeepSeek R1 7B locally on CPU
+🖥️  PAI Pulse dashboard live at localhost:31337
+🧠 WebUI ready via PAI interface
 📊 Dataview-ready vault with example queries
 🔄 Daily Systems Report flow active
 📦 All models fit in 32 GB RAM — no GPU required
@@ -140,7 +190,7 @@ export OLLAMA_HOST=http://localhost:11434
 
 ## Using Dataview Queries
 
-Open any note in `LIFE-OS-VAULT/01_Cognition/Dataview-Example-Queries.md` in Obsidian to see live data. Example:
+Open `LIFE-OS-VAULT/01_Cognition/Dataview-Example-Queries.md` in Obsidian to see live data:
 
 ```dataview
 TABLE date as "Date", Wins as "Top Win"
@@ -162,8 +212,11 @@ ForgeOS/
 │   ├── 05_Impact/          #   Projects, content, output
 │   └── README.md           #   Vault-specific docs
 ├── assets/                 # Diagrams and screenshot placeholders
+│   ├── five-stacks-diagram.md
+│   ├── screenshot-placeholder-vault-tree.md
+│   └── screenshot-placeholder-dashboard.md
 ├── Packs/                  # PAI skill packs (45 skills, 171 workflows)
-├── Releases/               # PAI versioned releases
+├── Releases/               # PAI versioned releases (v2.3 → v5.0.0)
 ├── Tools/                  # Validation and utility scripts
 ├── images/                 # PAI architecture diagrams
 ├── PLATFORM.md             # Platform-specific configuration
@@ -171,12 +224,51 @@ ForgeOS/
 └── README.md               # ← You are here
 ```
 
+## Architecture Diagram
+
+A full Mermaid and ASCII diagram is in [`assets/five-stacks-diagram.md`](assets/five-stacks-diagram.md).
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                     FORGEOS — FIVE STACKS                    │
+│                    (with feedback loops)                     │
+├──────────────────────────────────────────────────────────────┤
+│                                                              │
+│  01_Cognition  ──────────────────────────────→  02_Body      │
+│  (Mental Models,   ←─────────────────────────  (Health,      │
+│   Decisions,        Feedback Loop: Learning     Sleep,       │
+│   Daily Reports)     informs all stacks        Bloodwork)   │
+│       ↑                                                  ↓   │
+│       │                 03_Capital                          │
+│       │                 (Finances, Budget,                  │
+│       │                  Net Worth)                         │
+│       │                     ↓                               │
+│       │                 04_Relationships                     │
+│       │                 (People, Commitments,               │
+│       │                  Meetings)                          │
+│       │                     ↓                               │
+│       └────────── 05_Impact  ←───────────────────────────┘   │
+│                  (Projects, Content, Legacy)                │
+│                                                              │
+│               ┌────────────────────────┐                    │
+│               │   AI Layer (Local)    │                    │
+│               │  Ollama → Qwen 7B    │                    │
+│               │  PAI Pulse Dashboard  │                    │
+│               │  Dataview Queries    │                    │
+│               └────────┬───────────────┘                    │
+│                        ↓                                    │
+│               Queries all 5 stacks                          │
+│                                                              │
+└──────────────────────────────────────────────────────────────┘
+```
+
 ## Screenshots
 
-| Vault Tree View | Dataview Dashboard |
+| PAI Pulse Dashboard | Vault Tree View |
 |:---:|:---:|
-| ![Vault Tree](https://via.placeholder.com/400x250/1e293b/ffffff?text=Vault+Tree+View) | ![Dashboard](https://via.placeholder.com/400x250/0f172a/ffffff?text=Dataview+Dashboard) |
-| *(Replace with actual screenshot)* | *(Replace with actual screenshot)* |
+| ![Pulse Dashboard](https://via.placeholder.com/600x350/0f172a/9ACBFF?text=PAI+Pulse+Dashboard+localhost:31337) | ![Vault Tree](https://via.placeholder.com/600x350/1e293b/ffffff?text=ForgeOS+Vault+Tree) |
+| Goals, Metrics, Projects, Budget, Recs in one page | Obsidian vault with 5-stack hierarchy |
+| *(Replace `assets/screenshot-pulse-dashboard.png`)* | *(Replace `assets/screenshot-vault-tree.png`)* |
 
 ## License
 

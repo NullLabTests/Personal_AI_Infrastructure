@@ -24,6 +24,18 @@ ForgeOS is a living, queryable, version-controlled second brain — a Single Sou
 - **04_Relationships**: People notes, commitments, meeting logs. *The social layer.*
 - **05_Impact**: Projects, creative output, open-source plans, content. *The actuation layer.* Each feeds the next and loops back into cognition.
 
+## PAI Pulse Dashboard
+
+ForgeOS ships with **PAI Pulse** — a real-time life dashboard at **`http://localhost:31337`**. It renders your goals, metrics, projects, budget, team, and recommendations.
+
+```bash
+# Start the dashboard
+cd ~/.claude/PAI/PULSE && bun run pulse.ts
+# Then open http://localhost:31337
+```
+
+The dashboard covers all five stacks: Cognition (goals/recs), Body (health metrics), Capital (budget), Relationships (team/people), Impact (projects).
+
 ## Integration with PAI + Local LLM
 
 This vault pairs with the **PAI (Personal AI Infrastructure)** codebase running in this Codespace. The local **Qwen 2.5 7B** or **DeepSeek R1 7B** model (via Ollama) can:

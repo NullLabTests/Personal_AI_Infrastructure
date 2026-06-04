@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { getTelosContext } from "@/lib/telos-data"
-import { spawn } from "child_process"
+
+const OLLAMA_BASE = process.env.OLLAMA_BASE_URL || "http://localhost:11434"
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || "deepseek-r1:1.5b"
 
 export async function POST(request: Request) {
   try {
@@ -27,41 +29,30 @@ When answering questions:
 - If information isn't in the TELOS data, say so clearly
 - Keep responses concise but informative`
 
-    // Use Inference tool instead of direct API
-    const inferenceResult = await new Promise<{ success: boolean; output?: string; error?: string }>((resolve) => {
-      const homeDir = process.env.HOME || ''
-      const proc = spawn('bun', ['run', `${homeDir}/.claude/PAI/Tools/Inference.ts`, '--level', 'fast', systemPrompt, message], {
-        stdio: ['ignore', 'pipe', 'pipe'],
-      })
-
-      let stdout = ''
-      let stderr = ''
-
-      proc.stdout.on('data', (data) => { stdout += data.toString() })
-      proc.stderr.on('data', (data) => { stderr += data.toString() })
-
-      proc.on('close', (code) => {
-        if (code !== 0) {
-          resolve({ success: false, error: stderr || `Process exited with code ${code}` })
-        } else {
-          resolve({ success: true, output: stdout.trim() })
-        }
-      })
-
-      proc.on('error', (err) => {
-        resolve({ success: false, error: err.message })
-      })
+    // Call local Ollama API directly
+    const ollamaResponse = await fetch(`${OLLAMA_BASE}/api/chat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: OLLAMA_MODEL,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: message },
+        ],
+        stream: false,
+      }),
     })
 
-    if (!inferenceResult.success) {
-      console.error("Inference Error:", inferenceResult.error)
-      throw new Error(`Inference failed: ${inferenceResult.error}`)
+    if (!ollamaResponse.ok) {
+      const errorText = await ollamaResponse.text()
+      throw new Error(`Ollama API error ${ollamaResponse.status}: ${errorText}`)
     }
 
-    const assistantMessage = inferenceResult.output
+    const data = await ollamaResponse.json()
+    const assistantMessage = data.message?.content || ""
 
     if (!assistantMessage) {
-      throw new Error("No response from inference")
+      throw new Error("No response from Ollama")
     }
 
     return NextResponse.json({ response: assistantMessage })
