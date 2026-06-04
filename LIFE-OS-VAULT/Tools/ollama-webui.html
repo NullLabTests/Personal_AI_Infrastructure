@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeepSeek Life OS Chat</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; height: 100vh; display: flex; flex-direction: column; }
+  header { background: #161b22; border-bottom: 1px solid #30363d; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 16px; color: #58a6ff; flex: 1; }
+  select, button { background: #21262d; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+  select:hover, button:hover { background: #30363d; }
+  #chat { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .msg { max-width: 80%; padding: 12px 16px; border-radius: 8px; line-height: 1.5; font-size: 14px; white-space: pre-wrap; }
+  .user { background: #1f6feb; align-self: flex-end; color: #fff; }
+  .assistant { background: #161b22; align-self: flex-start; border: 1px solid #30363d; }
+  .system { background: #1c2128; align-self: center; font-size: 12px; color: #8b949e; border: 1px solid #30363d; }
+  .thinking { color: #8b949e; font-style: italic; font-size: 12px; }
+  #input-area { border-top: 1px solid #30363d; padding: 16px 20px; display: flex; gap: 12px; }
+  #input { flex: 1; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 6px; padding: 10px 14px; font-size: 14px; outline: none; resize: none; }
+  #input:focus { border-color: #58a6ff; }
+  #send { background: #238636; color: #fff; border: 1px solid #2ea043; border-radius: 6px; padding: 10px 20px; font-size: 14px; cursor: pointer; font-weight: 600; }
+  #send:hover { background: #2ea043; }
+  #send:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status { font-size: 12px; color: #8b949e; padding: 0 20px 8px; }
+  pre { background: #0d1117; padding: 8px; border-radius: 4px; overflow-x: auto; font-size: 13px; }
+  code { background: #0d1117; padding: 1px 4px; border-radius: 3px; font-size: 13px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>DeepSeek — Life OS Chat</h1>
+  <select id="model-select"></select>
+  <button id="clear-btn">Clear</button>
+</header>
+<div id="chat"></div>
+<div class="status" id="status">Ready</div>
+<div id="input-area">
+  <textarea id="input" rows="1" placeholder="Ask DeepSeek about your Life OS..." style="height:44px"></textarea>
+  <button id="send">Send</button>
+</div>
+<script>
+const OLLAMA_HOST = 'http://localhost:11434';
+let messages = [{ role: 'system', content: 'You are DeepSeek R1, a helpful AI assistant integrated with TheGoldenAnchor Life OS. You have access to a five-stack vault: Cognition, Body, Capital, Relationships, Impact. Be concise, thoughtful, and reference the Life OS context when relevant.' }];
+
+const chat = document.getElementById('chat');
+const input = document.getElementById('input');
+const send = document.getElementById('send');
+const clearBtn = document.getElementById('clear-btn');
+const statusBar = document.getElementById('status');
+const modelSelect = document.getElementById('model-select');
+
+async function loadModels() {
+  try {
+    const res = await fetch(`${OLLAMA_HOST}/api/tags`);
+    const data = await res.json();
+    modelSelect.innerHTML = data.models.map(m => `<option value="${m.name}">${m.name}</option>`).join('');
+    localStorage.getItem('ollama_model') && (modelSelect.value = localStorage.getItem('ollama_model'));
+  } catch(e) { modelSelect.innerHTML = '<option>deepseek-r1:1.5b</option>'; }
+}
+
+function addMessage(role, content) {
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+  div.textContent = content;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function setStatus(s) { statusBar.textContent = s; }
+
+async function sendMessage() {
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addMessage('user', text);
+  messages.push({ role: 'user', content: text });
+  send.disabled = true;
+  setStatus('Thinking...');
+
+  const thinkingDiv = document.createElement('div');
+  thinkingDiv.className = 'msg thinking';
+  thinkingDiv.textContent = 'Thinking...';
+  chat.appendChild(thinkingDiv);
+
+  try {
+    const res = await fetch(`${OLLAMA_HOST}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: modelSelect.value, messages, stream: false })
+    });
+    const data = await res.json();
+    const reply = data.message?.content || '(no response)';
+    thinkingDiv.remove();
+    let display = reply;
+    const thinkMatch = reply.match(/<think>([\s\S]*?)<\/think>/);
+    if (thinkMatch) {
+      display = reply.replace(/<think>[\s\S]*?<\/think>/, '').trim();
+    }
+    addMessage('assistant', display || reply);
+    messages.push({ role: 'assistant', content: reply });
+    setStatus('Ready');
+    localStorage.setItem('ollama_model', modelSelect.value);
+  } catch(e) {
+    thinkingDiv.remove();
+    addMessage('system', 'Error: ' + e.message);
+    setStatus('Error');
+  }
+  send.disabled = false;
+  input.focus();
+}
+
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+send.addEventListener('click', sendMessage);
+clearBtn.addEventListener('click', () => {
+  messages = [messages[0]];
+  chat.innerHTML = '';
+  setStatus('Cleared');
+  addMessage('system', 'Conversation cleared. System prompt preserved.');
+});
+
+loadModels();
+input.focus();
+addMessage('system', 'Connected to local DeepSeek via Ollama. Type a message to begin.');
+</script>
+</body>
+</html>

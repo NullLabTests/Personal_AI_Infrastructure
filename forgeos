@@ -1,0 +1,179 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+FORGEOS_DIR="$(cd "$(dirname "$0")" && pwd)"
+VAULT_DIR="$FORGEOS_DIR/LIFE-OS-VAULT"
+
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+CYAN='\033[0;36m'; BOLD='\033[1m'; NC='\033[0m'
+
+check_cmd() {
+  command -v "$1" &>/dev/null || test -f "$HOME/.bun/bin/$1" || test -f "/usr/local/bin/$1"
+}
+ensure_path() { export PATH="$HOME/.bun/bin:/usr/local/bin:$PATH"; }
+ensure_path
+
+header() {
+  echo -e "\n${CYAN}${BOLD}═══ $1 ═══${NC}"
+}
+
+ok()   { echo -e "  ${GREEN}✓${NC} $1"; }
+warn() { echo -e "  ${YELLOW}⚠${NC} $1"; }
+fail() { echo -e "  ${RED}✗${NC} $1"; }
+
+case "${1:-status}" in
+  status)
+    header "ForgeOS — System Status"
+    echo -e "  ${BOLD}Vault:${NC}     $VAULT_DIR"
+    echo -e "  ${BOLD}Repo root:${NC} $FORGEOS_DIR"
+
+    header "Ollama"
+    if check_cmd ollama; then
+      if curl -s http://localhost:11434/api/tags &>/dev/null; then
+        ok "Ollama running on port 11434"
+        ollama list 2>/dev/null | tail -n +2 | while read -r line; do
+          echo "    $(echo "$line" | awk '{print $1, $3}')"
+        done
+      else
+        warn "Ollama installed but not running"
+      fi
+    else
+      fail "Ollama not installed"
+    fi
+
+    header "PAI Pulse Dashboard"
+    if curl -s http://localhost:31337/healthz &>/dev/null; then
+      ok "Pulse running on http://localhost:31337"
+      curl -s http://localhost:31337/healthz | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+print(f'    Uptime: {d[\"uptime\"]}s')
+print(f'    Modules: {\", \".join(k for k in d[\"subsystems\"] if d[\"subsystems\"][k].get(\"status\")==\"ok\" or d[\"subsystems\"][k].get(\"enabled\"))}')" 2>/dev/null || true
+    else
+      if check_cmd bun; then
+        warn "Bun installed but Pulse not running"
+      else
+        fail "Bun not installed (required for Pulse)"
+      fi
+    fi
+
+    header "Bun"
+    if check_cmd bun; then
+      ok "Bun $(bun --version)"
+    else
+      fail "Bun not installed — run: curl -fsSL https://bun.sh/install | bash"
+    fi
+
+    header "Obsidian Vault"
+    if [ -d "$VAULT_DIR" ]; then
+      ok "Vault at $VAULT_DIR"
+      echo "    Stacks: $(ls -d "$VAULT_DIR"/*/ 2>/dev/null | wc -l) directories"
+      echo "    Reports: $(ls "$VAULT_DIR"/01_Cognition/Daily-Systems-Report-*.md 2>/dev/null | wc -l) files"
+    fi
+
+    header "Git"
+    echo -e "  ${BOLD}Remote:${NC}    $(git config --get remote.origin.url 2>/dev/null || echo 'not set')"
+    echo -e "  ${BOLD}Branch:${NC}    $(git branch --show-current)"
+    echo -e "  ${BOLD}Changes:${NC}   $(git status --short | wc -l) unstaged files"
+    ;;
+
+  start)
+    header "Starting ForgeOS"
+
+    if ! check_cmd ollama; then
+      fail "Ollama not installed. Run: curl -fsSL https://ollama.com/install.sh | sh"
+      exit 1
+    fi
+
+    if ! curl -s http://localhost:11434/api/tags &>/dev/null; then
+      echo "  Starting Ollama..."
+      ollama serve &>/tmp/ollama.log &
+      sleep 3
+      if curl -s http://localhost:11434/api/tags &>/dev/null; then
+        ok "Ollama started"
+      else
+        fail "Ollama failed to start — check /tmp/ollama.log"
+        exit 1
+      fi
+    else
+      ok "Ollama already running"
+    fi
+
+    if ! check_cmd bun; then
+      warn "Bun not installed. Pulse dashboard won't start."
+      warn "Install: curl -fsSL https://bun.sh/install | bash"
+    else
+      if curl -s http://localhost:31337/healthz &>/dev/null; then
+        ok "Pulse already running at http://localhost:31337"
+      elif [ -f ~/.claude/PAI/PULSE/pulse.ts ]; then
+        echo "  Starting PAI Pulse..."
+        cd ~/.claude/PAI/PULSE && bun run pulse.ts &>/tmp/pulse.log &
+        sleep 4
+        if curl -s http://localhost:31337/healthz &>/dev/null; then
+          ok "Pulse started at http://localhost:31337"
+        else
+          warn "Pulse may not have started — check /tmp/pulse.log"
+        fi
+      else
+        warn "Pulse not configured at ~/.claude/PAI/PULSE/"
+        warn "Run: mkdir -p ~/.claude/PAI/PULSE && cp -r $FORGEOS_DIR/Releases/v5.0.0/.claude/PAI/PULSE/* ~/.claude/PAI/PULSE/"
+      fi
+    fi
+
+    header "All Systems"
+    echo -e "  ${GREEN}ForgeOS is live.${NC}"
+    echo -e "  Vault:  $VAULT_DIR"
+    echo -e "  Pulse:  http://localhost:31337"
+    echo -e "  Ollama: http://localhost:11434"
+    ;;
+
+  report|daily)
+    # Generate a Daily Systems Report
+    DATE="${2:-$(date +%Y-%m-%d)}"
+    FILE="$VAULT_DIR/01_Cognition/Daily-Systems-Report-$DATE.md"
+
+    if [ -f "$FILE" ]; then
+      warn "Report for $DATE already exists: $FILE"
+      exit 0
+    fi
+
+    cat > "$FILE" <<EOF
+---
+tags: [daily-report, cognition, $(date +%Y)]
+date: $DATE
+---
+
+# Daily Systems Report — $DATE
+
+## Wins
+- [ ]
+
+## Blockers
+- [ ]
+
+## Next Actions
+- [ ]
+
+## Body Notes
+-
+
+## Capital Notes
+-
+
+## Relationship Notes
+-
+
+## Impact Notes
+-
+EOF
+    ok "Created $FILE"
+    ;;
+
+  *)
+    echo "Usage:"
+    echo "  ./forgeos status    — Show system status"
+    echo "  ./forgeos start     — Start Ollama + Pulse dashboard"
+    echo "  ./forgeos report    — Generate today's Daily Systems Report"
+    echo "  ./forgeos report YYYY-MM-DD — Generate report for a specific date"
+    ;;
+esac

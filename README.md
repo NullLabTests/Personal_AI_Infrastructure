@@ -146,36 +146,45 @@ ollama pull deepseek-r1:7b # 4.7 GB — also works
 
 ### Step 5: Generate your first Daily Systems Report
 ```bash
+./forgeos report                          # today's report
+# or manually:
 cp 01_Cognition/Daily-Systems-Report-2026-06-04.md \
    01_Cognition/Daily-Systems-Report-$(date +%Y-%m-%d).md
 ```
 
 ### Step 6: Verify the AI works
 ```bash
-ollama run qwen2.5:7b "Summarize: ForgeOS is a personal operating system."
+ollama run deepseek-r1:7b "Summarize: ForgeOS is a personal operating system."
 ```
 
-### Step 7: Start the Pulse dashboard
+### Step 7: Start everything with one command
 ```bash
-# Requires Bun
-curl -fsSL https://bun.sh/install | bash
-source ~/.bashrc
-
-# Copy Pulse from release files
-mkdir -p ~/.claude/PAI/PULSE
-cp -r Releases/v5.0.0/.claude/PAI/PULSE/* ~/.claude/PAI/PULSE/
-
-# Install dependencies & start
-cd ~/.claude/PAI/PULSE/Observability && bun install && cd ..
-bun run pulse.ts
-# Open http://localhost:31337
+./forgeos start
+# Opens: Ollama API (:11434) + Pulse Dashboard (:31337)
 ```
 
-### Step 8 (optional): Connect PAI agents
+### Step 8: Query your vault with AI
+```bash
+./Tools/ask-vault.sh "What were my most recent wins?"
+```
+
+### Step 9 (optional): Connect PAI agents
 [PAI](https://github.com/danielmiessler/Personal_AI_Infrastructure) is included. Configure for local Ollama:
 ```bash
 export OLLAMA_HOST=http://localhost:11434
 ```
+
+## 🛠️ Tools & Scripts
+
+| Tool | Purpose | Usage |
+|------|---------|-------|
+| **`./forgeos`** | One-command CLI — status, start, daily reports | `./forgeos status`, `./forgeos start`, `./forgeos report` |
+| **`./Tools/ask-vault.sh`** | RAG query your vault via Ollama | `./Tools/ask-vault.sh "What are my blockers?"` |
+| **`./LIFE-OS-VAULT/01_Cognition/Dataview-Example-Queries.md`** | Ready-to-use Dataview SQL for Obsidian | Open in Obsidian with Dataview enabled |
+| **`./LIFE-OS-VAULT/01_Cognition/Decision-Log/TEMPLATE.md`** | Structured decision documentation | Copy, rename, fill |
+| **`./LIFE-OS-VAULT/01_Cognition/Monthly-Review-Template.md`** | Monthly reflection across all 5 stacks | Copy, fill end of month |
+| **`./LIFE-OS-VAULT/03_Capital/Budget/budget-template.csv`** | Budget tracking CSV template | Import into spreadsheet app |
+| **`./LIFE-OS-VAULT/04_Relationships/People/TEMPLATE.md`** | People notes template | Copy per person, fill |
 
 ## Current Status
 
@@ -204,23 +213,26 @@ LIMIT 10
 
 ```
 ForgeOS/
+├── forgeos                 # ⚡ One-command CLI (status / start / report)
 ├── LIFE-OS-VAULT/          # ⭐ The vault — star of the repo
 │   ├── 01_Cognition/       #   Mental models, decisions, daily reports
+│   │   ├── Decision-Log/   #   Decision templates & records
+│   │   ├── Dataview-Example-Queries.md
+│   │   └── Monthly-Review-Template.md
 │   ├── 02_Body/            #   Health metrics, sleep, bloodwork
 │   ├── 03_Capital/         #   Finances, net worth, budget
 │   ├── 04_Relationships/   #   People, commitments, meetings
 │   ├── 05_Impact/          #   Projects, content, output
 │   └── README.md           #   Vault-specific docs
+├── Tools/                  # Utility scripts
+│   ├── ask-vault.sh        #   RAG query your vault via Ollama
+│   └── validate-protected.ts
 ├── assets/                 # Diagrams and screenshot placeholders
-│   ├── five-stacks-diagram.md
-│   ├── screenshot-placeholder-vault-tree.md
-│   └── screenshot-placeholder-dashboard.md
 ├── Packs/                  # PAI skill packs (45 skills, 171 workflows)
 ├── Releases/               # PAI versioned releases (v2.3 → v5.0.0)
-├── Tools/                  # Validation and utility scripts
 ├── images/                 # PAI architecture diagrams
-├── PLATFORM.md             # Platform-specific configuration
-├── SECURITY.md             # Security policy
+├── PLATFORM.md
+├── SECURITY.md
 └── README.md               # ← You are here
 ```
 
